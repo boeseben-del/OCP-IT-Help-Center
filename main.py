@@ -1,5 +1,5 @@
 """
-OCP IT Help Center - Windows Desktop Background Agent
+OCP IT Helpdesk - Windows Desktop Background Agent
 ======================================================
 Captures screenshots and IT support tickets via a global hotkey (F8).
 Runs silently in the system tray until activated.
@@ -22,7 +22,7 @@ class ITAgentApp(ctk.CTk):
 
     def __init__(self):
         super().__init__()
-        self.title("OCP IT Help Center")
+        self.title("OCP IT Helpdesk")
         self.geometry("1x1+0+0")
         self.attributes("-alpha", 0)
         self.protocol("WM_DELETE_WINDOW", self.quit_app)
@@ -36,8 +36,8 @@ class ITAgentApp(ctk.CTk):
         """Start the tray icon and hotkey listener after the main loop begins."""
         self._tray.start()
         self.withdraw()
-        print("[OCP IT Help Center] Running in background. Press F8 to open a support ticket.")
-        print("[OCP IT Help Center] Right-click the system tray icon to quit.")
+        print("[OCP IT Helpdesk] Running in background. Press F8 to open a support ticket.")
+        print("[OCP IT Helpdesk] Right-click the system tray icon to quit.")
 
     def open_ticket_window(self, sysinfo, screenshot_buf, screenshot_img):
         """Open the ticket window (called from the hotkey/tray thread via .after)."""
@@ -49,7 +49,7 @@ class ITAgentApp(ctk.CTk):
 
     def quit_app(self):
         """Gracefully shut down the application."""
-        print("[OCP IT Help Center] Shutting down...")
+        print("[OCP IT Helpdesk] Shutting down...")
         try:
             self._tray.stop()
         except Exception:
@@ -63,7 +63,7 @@ class ITAgentApp(ctk.CTk):
 
 def main():
     print("=" * 50)
-    print("  OCP IT Help Center")
+    print("  OCP IT Helpdesk")
     print("  Press F8 to open a support ticket")
     print("  The app runs silently in the system tray")
     print("=" * 50)
@@ -80,12 +80,12 @@ if __name__ == "__main__":
 # =====================================================================
 # To compile this into a standalone Windows executable, run:
 #
-#   pyinstaller --noconsole --onefile --name "OCP_IT_Help_Center" main.py
+#   pyinstaller --noconsole --onefile --name "OCP_IT_Helpdesk" main.py
 #
 # Options:
 #   --noconsole : Hide the console window (runs as a background app)
 #   --onefile   : Package everything into a single .exe
-#   --name      : Name the output executable "OCP_IT_Help_Center.exe"
+#   --name      : Name the output executable "OCP_IT_Helpdesk.exe"
 #
 # The resulting executable will be in the `dist/` folder.
 # =====================================================================
