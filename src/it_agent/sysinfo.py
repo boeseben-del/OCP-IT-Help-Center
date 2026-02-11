@@ -3,6 +3,7 @@
 import socket
 import platform
 import os
+import uuid
 import psutil
 import requests as req_lib
 
@@ -30,6 +31,15 @@ def get_public_ip():
         return "N/A"
 
 
+def get_mac_address():
+    try:
+        mac = uuid.getnode()
+        mac_str = ':'.join(f'{(mac >> i) & 0xFF:02x}' for i in range(40, -1, -8))
+        return mac_str.upper()
+    except Exception:
+        return "N/A"
+
+
 def get_current_user():
     try:
         return os.getlogin()
@@ -45,8 +55,29 @@ def get_ram_usage():
     return psutil.virtual_memory().percent
 
 
+def get_disk_usage():
+    try:
+        disk = psutil.disk_usage('/')
+        if platform.system() == "Windows":
+            disk = psutil.disk_usage('C:\\')
+        return disk.percent
+    except Exception:
+        return 0.0
+
+
 def get_os_info():
-    return f"{platform.system()} {platform.release()}"
+    system = platform.system()
+    if system == "Windows":
+        try:
+            version_str = platform.version()
+            build = int(version_str.split('.')[-1])
+            if build >= 22000:
+                return "Windows 11"
+            else:
+                return f"Windows {platform.release()}"
+        except (ValueError, IndexError, AttributeError):
+            return f"Windows {platform.release()}"
+    return f"{system} {platform.release()}"
 
 
 def get_active_window_title():
@@ -71,15 +102,49 @@ def get_active_window_title():
             return "Unknown"
 
 
+def get_user_email():
+    """Attempt to get the logged-in user's email from Windows."""
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["powershell", "-Command",
+             "(Get-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Office\\16.0\\Common\\Identity' -Name 'ADUserName' -ErrorAction SilentlyContinue).ADUserName"],
+            capture_output=True, text=True, timeout=5
+        )
+        email = result.stdout.strip()
+        if email and "@" in email:
+            return email
+    except Exception:
+        pass
+
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["powershell", "-Command",
+             "([System.Security.Principal.WindowsIdentity]::GetCurrent().Name)"],
+            capture_output=True, text=True, timeout=5
+        )
+        identity = result.stdout.strip()
+        if identity:
+            return identity
+    except Exception:
+        pass
+
+    return ""
+
+
 def gather_all():
     """Gather all system information into a dictionary."""
     return {
         "hostname": get_hostname(),
         "local_ip": get_local_ip(),
         "public_ip": get_public_ip(),
+        "mac_address": get_mac_address(),
         "username": get_current_user(),
+        "user_email": get_user_email(),
         "cpu_usage": get_cpu_usage(),
         "ram_usage": get_ram_usage(),
+        "disk_usage": get_disk_usage(),
         "os_info": get_os_info(),
         "active_window": get_active_window_title(),
     }
