@@ -1,1 +1,1 @@
-"""IT Support Agent - Windows Desktop Agent for capturing screenshots and IT tickets."""
+"""OCP IT Help Center - Windows Desktop Agent for capturing screenshots and IT tickets."""
