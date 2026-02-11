@@ -2,36 +2,50 @@
 
 import threading
 import os
+import sys
 from PIL import Image, ImageDraw
 from src.it_agent.sysinfo import gather_all
 from src.it_agent.screenshot import capture_screenshot
 
 
-def create_tray_icon_image(size=64, color=(0, 122, 204)):
-    """Generate a simple colored square icon for the system tray."""
-    img = Image.new("RGB", (size, size), color)
-    draw = ImageDraw.Draw(img)
-    margin = size // 6
-    draw.rectangle(
-        [margin, margin, size - margin, size - margin],
-        fill=(255, 255, 255),
-    )
-    draw.text(
-        (size // 6, size // 6),
-        "OCP",
-        fill=color,
-    )
-    return img
-
-
 def _resource_path(relative_path):
     """Get absolute path to resource, works for PyInstaller bundled apps."""
     try:
-        import sys
-        base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+        base_path = getattr(sys, '_MEIPASS', None)
+        if base_path is None:
+            base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     except Exception:
-        base_path = os.path.dirname(os.path.abspath(__file__))
+        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     return os.path.join(base_path, relative_path)
+
+
+def load_tray_icon():
+    """Load the OCP logo as the tray icon, or generate a fallback."""
+    try:
+        logo_path = _resource_path(os.path.join("assets", "ocp_tray.png"))
+        if os.path.exists(logo_path):
+            img = Image.open(logo_path)
+            img = img.resize((64, 64), Image.LANCZOS)
+            return img
+    except Exception:
+        pass
+
+    try:
+        logo_path = _resource_path(os.path.join("assets", "ocp_logo.png"))
+        if os.path.exists(logo_path):
+            img = Image.open(logo_path).convert("RGBA")
+            max_dim = max(img.width, img.height)
+            square = Image.new("RGBA", (max_dim, max_dim), (0, 0, 0, 0))
+            square.paste(img, ((max_dim - img.width) // 2, (max_dim - img.height) // 2))
+            return square.resize((64, 64), Image.LANCZOS)
+    except Exception:
+        pass
+
+    img = Image.new("RGB", (64, 64), (0, 46, 86))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle([10, 10, 54, 54], fill=(71, 143, 204))
+    draw.text((14, 20), "OCP", fill=(255, 255, 255))
+    return img
 
 
 class TrayManager:
@@ -59,7 +73,7 @@ class TrayManager:
             import pystray
             from pystray import MenuItem
 
-            icon_image = create_tray_icon_image()
+            icon_image = load_tray_icon()
             menu = pystray.Menu(
                 MenuItem("Open (F8)", self._on_open),
                 MenuItem("Quit", self._on_quit),
