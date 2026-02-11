@@ -35,7 +35,9 @@ def send_ticket(data, screenshot_bytes=None):
     user_email = data.get("email", "")
 
     if not user_email or "@" not in user_email:
-        user_email = f"{user_name.lower().replace(' ', '.')}@company.com"
+        user_email = os.environ.get("HAPPYFOX_DEFAULT_EMAIL", "")
+    if not user_email:
+        return False, "Could not determine your email address. Please contact IT support directly."
 
     body = {
         "subject": data.get("subject", "OCP IT Help Center Request"),
