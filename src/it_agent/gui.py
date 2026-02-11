@@ -1,4 +1,4 @@
-"""CustomTkinter GUI for the IT Support Request form."""
+"""CustomTkinter GUI for the OCP IT Help Center."""
 
 import customtkinter as ctk
 from PIL import Image, ImageTk
@@ -14,12 +14,12 @@ ctk.set_default_color_theme("dark-blue")
 
 
 class TicketWindow(ctk.CTkToplevel):
-    """The IT Support Request popup window."""
+    """The OCP IT Help Center popup window."""
 
     def __init__(self, master, sysinfo, screenshot_buf, screenshot_img):
         super().__init__(master)
-        self.title("IT Support Request")
-        self.geometry("580x720")
+        self.title("OCP IT Help Center")
+        self.geometry("600x780")
         self.resizable(False, False)
         self.attributes("-topmost", True)
         self.protocol("WM_DELETE_WINDOW", self._on_close)
@@ -37,7 +37,7 @@ class TicketWindow(ctk.CTkToplevel):
         pad = {"padx": 20, "pady": (5, 5)}
 
         header = ctk.CTkLabel(
-            self, text="IT Support Request",
+            self, text="OCP IT Help Center",
             font=ctk.CTkFont(size=24, weight="bold"),
         )
         header.pack(pady=(20, 5))
@@ -52,12 +52,23 @@ class TicketWindow(ctk.CTkToplevel):
 
         sysframe = ctk.CTkFrame(self, fg_color="transparent")
         sysframe.pack(fill="x", **pad)
-        info_text = (
+
+        row1 = ctk.CTkFrame(sysframe, fg_color="transparent")
+        row1.pack(fill="x")
+        info_text_1 = (
             f"CPU: {self.sysinfo['cpu_usage']}%   "
             f"RAM: {self.sysinfo['ram_usage']}%   "
-            f"IP: {self.sysinfo['local_ip']}"
+            f"Disk: {self.sysinfo['disk_usage']}%"
         )
-        ctk.CTkLabel(sysframe, text=info_text, font=ctk.CTkFont(size=11), text_color="gray").pack()
+        ctk.CTkLabel(row1, text=info_text_1, font=ctk.CTkFont(size=11), text_color="gray").pack()
+
+        row2 = ctk.CTkFrame(sysframe, fg_color="transparent")
+        row2.pack(fill="x")
+        info_text_2 = (
+            f"IP: {self.sysinfo['local_ip']}   "
+            f"MAC: {self.sysinfo['mac_address']}"
+        )
+        ctk.CTkLabel(row2, text=info_text_2, font=ctk.CTkFont(size=11), text_color="gray").pack()
 
         if self.screenshot_img is not None:
             self.screenshot_frame = ctk.CTkFrame(self)
@@ -85,12 +96,12 @@ class TicketWindow(ctk.CTkToplevel):
 
         ctk.CTkLabel(self, text="Subject:", font=ctk.CTkFont(size=13, weight="bold")).pack(anchor="w", padx=20, pady=(8, 2))
         default_subject = f"Support Request from {self.sysinfo['username']} on {self.sysinfo['hostname']}"
-        self.subject_entry = ctk.CTkEntry(self, width=520, placeholder_text="Subject line...")
+        self.subject_entry = ctk.CTkEntry(self, width=540, placeholder_text="Subject line...")
         self.subject_entry.insert(0, default_subject)
         self.subject_entry.pack(**pad)
 
         ctk.CTkLabel(self, text="Description:", font=ctk.CTkFont(size=13, weight="bold")).pack(anchor="w", padx=20, pady=(8, 2))
-        self.desc_text = ctk.CTkTextbox(self, width=520, height=160)
+        self.desc_text = ctk.CTkTextbox(self, width=540, height=140)
         self.desc_text.insert("1.0", "")
         self.desc_text.pack(**pad)
 
@@ -104,19 +115,21 @@ class TicketWindow(ctk.CTkToplevel):
             ).pack(side="left", padx=(0, 20))
 
         footer = ctk.CTkFrame(self, fg_color="transparent")
-        footer.pack(fill="x", padx=20, pady=(10, 15))
-
-        self.submit_btn = ctk.CTkButton(
-            footer, text="Submit Ticket", width=200, height=40,
-            font=ctk.CTkFont(size=14, weight="bold"),
-            command=self._on_submit,
-        )
-        self.submit_btn.pack(side="left")
+        footer.pack(fill="x", padx=20, pady=(15, 20))
 
         self.status_label = ctk.CTkLabel(
             footer, text="", font=ctk.CTkFont(size=12),
         )
-        self.status_label.pack(side="left", padx=20)
+        self.status_label.pack(side="left", fill="x", expand=True)
+
+        self.submit_btn = ctk.CTkButton(
+            footer, text="Submit Request", width=200, height=45,
+            font=ctk.CTkFont(size=15, weight="bold"),
+            fg_color="#1a73e8",
+            hover_color="#1557b0",
+            command=self._on_submit,
+        )
+        self.submit_btn.pack(side="right")
 
     def _toggle_screenshot(self):
         if self.remove_ss_var.get():
@@ -146,7 +159,7 @@ class TicketWindow(ctk.CTkToplevel):
             "description": description,
             "priority": self.priority_var.get(),
             "name": self.sysinfo.get("username", "User"),
-            "email": "support@example.com",
+            "email": self.sysinfo.get("user_email", ""),
             **self.sysinfo,
         }
 
