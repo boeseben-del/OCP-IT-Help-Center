@@ -1,4 +1,4 @@
-"""CustomTkinter GUI for the OCP IT Help Center."""
+"""CustomTkinter GUI for OCP IT Helpdesk."""
 
 import customtkinter as ctk
 from PIL import Image, ImageTk
@@ -14,11 +14,11 @@ ctk.set_default_color_theme("dark-blue")
 
 
 class TicketWindow(ctk.CTkToplevel):
-    """The OCP IT Help Center popup window."""
+    """The OCP IT Helpdesk popup window."""
 
     def __init__(self, master, sysinfo, screenshot_buf, screenshot_img):
         super().__init__(master)
-        self.title("OCP IT Help Center")
+        self.title("OCP IT Helpdesk")
         self.geometry("600x780")
         self.resizable(False, False)
         self.attributes("-topmost", True)
@@ -37,7 +37,7 @@ class TicketWindow(ctk.CTkToplevel):
         pad = {"padx": 20, "pady": (5, 5)}
 
         header = ctk.CTkLabel(
-            self, text="OCP IT Help Center",
+            self, text="OCP IT Helpdesk",
             font=ctk.CTkFont(size=24, weight="bold"),
         )
         header.pack(pady=(20, 5))
@@ -57,7 +57,7 @@ class TicketWindow(ctk.CTkToplevel):
         row1.pack(fill="x")
         info_text_1 = (
             f"CPU: {self.sysinfo['cpu_usage']}%   "
-            f"RAM: {self.sysinfo['ram_usage']}%   "
+            f"RAM: {self.sysinfo['ram_usage']}% ({self.sysinfo.get('total_ram', 'N/A')})   "
             f"Disk: {self.sysinfo['disk_usage']}%"
         )
         ctk.CTkLabel(row1, text=info_text_1, font=ctk.CTkFont(size=11), text_color="gray").pack()
@@ -66,7 +66,8 @@ class TicketWindow(ctk.CTkToplevel):
         row2.pack(fill="x")
         info_text_2 = (
             f"IP: {self.sysinfo['local_ip']}   "
-            f"MAC: {self.sysinfo['mac_address']}"
+            f"MAC: {self.sysinfo['mac_address']}   "
+            f"Uptime: {self.sysinfo.get('uptime', 'N/A')}"
         )
         ctk.CTkLabel(row2, text=info_text_2, font=ctk.CTkFont(size=11), text_color="gray").pack()
 
