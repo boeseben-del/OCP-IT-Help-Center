@@ -4,6 +4,7 @@ import socket
 import platform
 import os
 import uuid
+import time
 import psutil
 import requests as req_lib
 
@@ -65,6 +66,50 @@ def get_disk_usage():
         return disk.percent
     except Exception:
         return 0.0
+
+
+def get_uptime():
+    try:
+        boot_time = psutil.boot_time()
+        uptime_seconds = int(time.time() - boot_time)
+        days = uptime_seconds // 86400
+        hours = (uptime_seconds % 86400) // 3600
+        minutes = (uptime_seconds % 3600) // 60
+        parts = []
+        if days > 0:
+            parts.append(f"{days}d")
+        if hours > 0:
+            parts.append(f"{hours}h")
+        parts.append(f"{minutes}m")
+        return " ".join(parts)
+    except Exception:
+        return "N/A"
+
+
+def get_battery_status():
+    try:
+        battery = psutil.sensors_battery()
+        if battery is None:
+            return "No battery (desktop)"
+        status = "Charging" if battery.power_plugged else "On battery"
+        return f"{battery.percent}% ({status})"
+    except Exception:
+        return "N/A"
+
+
+def get_total_ram():
+    try:
+        total_gb = psutil.virtual_memory().total / (1024 ** 3)
+        return f"{total_gb:.1f} GB"
+    except Exception:
+        return "N/A"
+
+
+def get_logical_processors():
+    try:
+        return psutil.cpu_count(logical=True)
+    except Exception:
+        return "N/A"
 
 
 def get_os_info():
@@ -170,4 +215,8 @@ def gather_all():
         "disk_usage": get_disk_usage(),
         "os_info": get_os_info(),
         "active_window": get_active_window_title(),
+        "uptime": get_uptime(),
+        "battery": get_battery_status(),
+        "total_ram": get_total_ram(),
+        "logical_processors": get_logical_processors(),
     }
