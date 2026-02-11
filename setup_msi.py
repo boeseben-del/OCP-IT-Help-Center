@@ -42,7 +42,7 @@ build_exe_options = {
 bdist_msi_options = {
     "upgrade_code": "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}",
     "add_to_path": False,
-    "initial_target_dir": r"[ProgramFilesFolder]\IT_Agent",
+    "initial_target_dir": r"[ProgramFilesFolder]\OCP_IT_Help_Center",
 }
 
 base = None
@@ -53,18 +53,18 @@ executables = [
     Executable(
         "main.py",
         base=base,
-        target_name="IT_Agent.exe",
-        shortcut_name="IT Support Agent",
+        target_name="OCP_IT_Help_Center.exe",
+        shortcut_name="OCP IT Help Center",
         shortcut_dir="DesktopFolder",
         icon=None,
     )
 ]
 
 setup(
-    name="IT Support Agent",
+    name="OCP IT Help Center",
     version="1.0.0",
-    description="IT Support Agent - Background desktop tool for capturing screenshots and IT tickets",
-    author="IT Support",
+    description="OCP IT Help Center - Background desktop tool for capturing screenshots and IT tickets",
+    author="OCP IT",
     options={
         "build_exe": build_exe_options,
         "bdist_msi": bdist_msi_options,
