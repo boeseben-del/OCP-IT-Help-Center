@@ -1,0 +1,73 @@
+name: Build OCP IT Helpdesk Installer
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build-msi:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install customtkinter pystray Pillow keyboard pyautogui requests psutil cx_Freeze pywin32
+
+      - name: Build MSI Installer
+        run: |
+          python setup_msi.py bdist_msi
+
+      - name: Upload MSI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OCP_IT_Helpdesk_MSI
+          path: dist/*.msi
+          retention-days: 90
+
+      - name: Build EXE with PyInstaller (tray app)
+        run: |
+          pip install pyinstaller
+          pyinstaller --noconsole --onefile --name "OCP_IT_Helpdesk" --icon "assets/ocp_icon.ico" --add-data "assets;assets" main.py
+
+      - name: Upload EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OCP_IT_Helpdesk_EXE
+          path: dist/OCP_IT_Helpdesk.exe
+          retention-days: 90
+
+      - name: Build Service EXE with PyInstaller
+        run: |
+          pyinstaller --onefile --name "OCP_IT_Helpdesk_Service" --icon "assets/ocp_icon.ico" --hidden-import win32timezone src/it_agent/service.py
+
+      - name: Upload Service EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OCP_IT_Helpdesk_Service_EXE
+          path: dist/OCP_IT_Helpdesk_Service.exe
+          retention-days: 90
+
+      - name: Bundle Service Manager
+        run: |
+          copy service_manager.py dist\service_manager.py
+
+      - name: Upload Complete Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: OCP_IT_Helpdesk_Complete
+          path: |
+            dist/OCP_IT_Helpdesk.exe
+            dist/OCP_IT_Helpdesk_Service.exe
+            dist/service_manager.py
+          retention-days: 90
